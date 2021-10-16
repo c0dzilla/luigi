@@ -6,7 +6,6 @@ app = Flask(__name__)
 
 config = json.load(open('config.json',))
 
-
 def send_pasta(channel_id):
     token = config.get("slackbot_token")
     headers = {'Authorization': 'Bearer ' + token}

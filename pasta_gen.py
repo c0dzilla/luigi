@@ -1,15 +1,34 @@
-import requests, json, time
+import requests, json, time, os
 from random import randrange
 
 config = json.load(open('config.json',))
 
-pastas = []
-kiddie_indexes = []
-last_refresh_time = 0
+def read_pasta_cache():
+    pasta_cache_path = 'pasta_cache.json'
+    if os.path.isfile(pasta_cache_path) and os.access(pasta_cache_path, os.R_OK):
+        return json.load(open(pasta_cache_path))
+    return None
 
 
-def refresh():
-    global pastas, kiddie_indexes
+def maybe_refresh():
+    current_time = int(time.time())
+
+    pasta_cache = read_pasta_cache()
+    if pasta_cache is None:
+        refresh(current_time)
+        return
+
+    last_refresh_time = pasta_cache.get('last_refresh_time')
+    if (current_time - last_refresh_time >= config.get("pasta_refresh_interval_secs")):
+        refresh(current_time)
+        return
+
+    # safety net in case previous refresh couldn't fetch pastas for some reason
+    if len(pasta_cache.get('pastas')) == 0:
+        refresh(current_time)
+
+
+def refresh(current_time):
     pastas = []
     kiddie_indexes = []
 
@@ -59,26 +78,43 @@ def refresh():
         if not post['data']['over_18']:
             kiddie_indexes.append(len(pastas) - 1)
 
+    pasta_cache = {
+        'pastas': pastas,
+        'kiddie_indexes': kiddie_indexes,
+        'last_refresh_time': current_time
+    }
 
-def maybe_refresh():
-    global last_refresh_time
-    current_time = int(time.time())
-    if (current_time - last_refresh_time >= config.get("pasta_refresh_interval_secs")):
-        print("Refreshing pastas at: ", current_time)
-        last_refresh_time = current_time
-        refresh()
+    # update cache file
+    with open('pasta_cache.json', 'w') as pasta_cache_file:
+        print("Refreshing pasta cache at: ", current_time)
+        json.dump(pasta_cache, pasta_cache_file)
 
 
 def any_pasta():
     maybe_refresh()
+    pasta_cache = read_pasta_cache()
+
+    while pasta_cache is None:
+        maybe_refresh()
+        pasta_cache = read_pasta_cache()
+
+    pastas = read_pasta_cache.get("pastas")
     return pastas[randrange(len(pastas))]
 
 
 def any_kiddie_pasta():
     maybe_refresh()
+    pasta_cache = read_pasta_cache()
 
-    # no kiddie content available unfortunately
+    while pasta_cache is None:
+        maybe_refresh()
+        pasta_cache = read_pasta_cache()
+
+    pastas = pasta_cache.get("pastas")
+    kiddie_indexes = pasta_cache.get("kiddie_indexes")
+
+    # no kiddie content available unfortunately, return without filter
     if len(kiddie_indexes) == 0:
-        return any_pasta()
+        return pastas[randrange(len(pastas))]
 
     return pastas[kiddie_indexes[randrange(len(kiddie_indexes))]]
