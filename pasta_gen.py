@@ -32,8 +32,8 @@ def refresh():
 
     # while the token is valid (~2 hours) we just add headers=headers to our requests
     res = requests.get("https://oauth.reddit.com/r/copypasta/top",
-                    headers=headers,
-                    params=params)
+                       headers=headers,
+                       params=params)
 
     # loop through each post retrieved from GET request
     for post in res.json()['data']['children']:
@@ -53,8 +53,10 @@ def refresh():
 
 
 def maybe_refresh():
+    global last_refresh_time
     current_time = int(time.time())
-    if (current_time - last_refresh_time < config.get("pasta_refresh_interval_secs")):
+    if (current_time - last_refresh_time >= config.get("pasta_refresh_interval_secs")):
+        print("Refreshing pastas at: ", current_time)
         last_refresh_time = current_time
         refresh()
 
@@ -64,8 +66,9 @@ def any_pasta():
 
 def any_kiddie_pasta():
     maybe_refresh()
-    return pastas[kiddie_indexes[randrange(len(kiddie_indexes))]]
 
-# refresh()
-# print(any_pasta())
-# print(any_kiddie_pasta())
+    # no kiddie content available unfortunately
+    if len(kiddie_indexes) == 0:
+        return any_pasta()
+
+    return pastas[kiddie_indexes[randrange(len(kiddie_indexes))]]
