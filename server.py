@@ -6,6 +6,7 @@ app = Flask(__name__)
 
 config = json.load(open('config.json',))
 
+
 def send_pasta(channel_id):
     token = config.get("slackbot_token")
     headers = {'Authorization': 'Bearer ' + token}
@@ -18,7 +19,7 @@ def send_pasta(channel_id):
 
     r = requests.post('https://slack.com/api/chat.postMessage',
                       headers=headers,
-                      data={"channel": channel_id, "text": any_pasta().get("selftext")})
+                      data={"channel": channel_id, "text": pasta_text})
 
 
 @app.route('/',methods = ['POST'])
@@ -43,6 +44,7 @@ def respond():
                     send_pasta(channel_id)
 
     return jsonify({"status": "ok"})
-    
+
+
 if __name__ == "__main__":
     app.run(debug=True)

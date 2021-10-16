@@ -5,6 +5,6 @@
     "reddit_password": "",
     "slackbot_token": "",
 
-    "kiddie_mode": false,
+    "kiddie_mode": true,
     "pasta_refresh_interval_secs": 60
 }

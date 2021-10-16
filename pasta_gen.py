@@ -7,7 +7,12 @@ pastas = []
 kiddie_indexes = []
 last_refresh_time = 0
 
-def refresh(): 
+
+def refresh():
+    global pastas, kiddie_indexes
+    pastas = []
+    kiddie_indexes = []
+
     # note that CLIENT_ID refers to 'personal use script' and SECRET_TOKEN to 'token'
     auth = requests.auth.HTTPBasicAuth(config.get("reddit_client_id"),
                                        config.get("reddit_client_secret"))
@@ -60,9 +65,11 @@ def maybe_refresh():
         last_refresh_time = current_time
         refresh()
 
+
 def any_pasta():
     maybe_refresh()
     return pastas[randrange(len(pastas))]
+
 
 def any_kiddie_pasta():
     maybe_refresh()
