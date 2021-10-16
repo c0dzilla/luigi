@@ -33,10 +33,13 @@ def refresh():
     TOKEN = res.json()['access_token']
     headers['Authorization'] = "bearer " + TOKEN
 
-    params = {'limit': 10}
+    limit = config.get("pasta_cache_count")
+    if limit is None or limit >= 25:
+        limit = 25
+    params = {'limit': limit}
 
     # while the token is valid (~2 hours) we just add headers=headers to our requests
-    res = requests.get("https://oauth.reddit.com/r/copypasta/top",
+    res = requests.get("https://oauth.reddit.com/r/copypasta/new",
                        headers=headers,
                        params=params)
 
