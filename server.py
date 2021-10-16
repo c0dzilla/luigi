@@ -1,12 +1,12 @@
-from flask import Flask, jsonify, request
 import requests
-import os
+from flask import Flask, jsonify, request
+from pasta_gen import any_pasta, any_kiddie_pasta
 
 app = Flask(__name__)
 
 @app.route('/',methods = ['POST'])
 def respond():
-    token = os.environ['SLACKBOT_TOKEN']
+    token = json.load(open('config.json',)).get("slackbot_token")
 
     content = request.json
     if "challenge" in content:
@@ -23,7 +23,7 @@ def respond():
 
                 headers = {'Authorization': 'Bearer ' + token}
                 r = requests.post('https://slack.com/api/chat.postMessage', headers=headers,
-                data={"channel": channel_id, "text": "Hello world"})
+                data={"channel": channel_id, "text": any_pasta().get("selftext")})
 
 
     return jsonify(content)
