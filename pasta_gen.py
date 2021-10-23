@@ -98,7 +98,7 @@ def any_pasta():
         maybe_refresh()
         pasta_cache = read_pasta_cache()
 
-    pastas = read_pasta_cache.get("pastas")
+    pastas = pasta_cache.get("pastas")
     return pastas[randrange(len(pastas))]
 
 
