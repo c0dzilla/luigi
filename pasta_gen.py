@@ -32,7 +32,7 @@ def refresh(current_time):
     pastas = []
     kiddie_indexes = []
 
-    # note that CLIENT_ID refers to 'personal use script' and SECRET_TOKEN to 'token'
+    # setup auth to request reddit for an OAuth token
     auth = requests.auth.HTTPBasicAuth(config.get("reddit_client_id"),
                                        config.get("reddit_client_secret"))
 
@@ -57,7 +57,6 @@ def refresh(current_time):
         limit = 25
     params = {'limit': limit}
 
-    # while the token is valid (~2 hours) we just add headers=headers to our requests
     res = requests.get("https://oauth.reddit.com/r/copypasta/new",
                        headers=headers,
                        params=params)
